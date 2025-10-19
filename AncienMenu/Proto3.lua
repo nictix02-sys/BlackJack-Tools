@@ -138,7 +138,7 @@ AimbotTab:CreateToggle({
                 Image = "x-circle",
             })
         end
-    end
+    end,
 })
 
 -- ========================================
@@ -836,4 +836,4 @@ InfoTab:CreateButton({
     end,
 })
 
-print("[Menu] Chargé avec succès par Edaward_01 - Version 1.5")
+print("[Menu] Chargé avec succès par Edaward_01 - Version 1.1")

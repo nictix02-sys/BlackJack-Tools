@@ -1,6 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/Fly.lua'))()
 local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/TP.lua'))()
+local AutoClicker = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/auto.lua'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "Menu by Edaward_01",
@@ -18,6 +19,7 @@ local Window = Rayfield:CreateWindow({
     },
     KeySystem = false
 })
+
 
 -- ONGLET FLY
 local FlyTab = Window:CreateTab("Fly", "plane")

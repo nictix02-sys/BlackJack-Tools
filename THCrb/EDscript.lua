@@ -187,6 +187,8 @@ AimbotTab:CreateToggle({
    CurrentValue = false,
    Callback = function(Value)
       Aimbot.Load()
+   else
+      Aimbot.UnLoad()
    end
 })
 

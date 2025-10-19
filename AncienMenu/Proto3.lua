@@ -4,6 +4,10 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/Fly.lua'))()
 local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/TP.lua'))()
+local ESP = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/ESP.lua'))()
+local Aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua"))()
+local ItemsManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/give.lua'))()
+local manager = ItemsManager.new()
 
 -- Bibliothèque AutoClicker intégrée
 local AutoClicker = {}
@@ -103,6 +107,450 @@ local Window = Rayfield:CreateWindow({
     },
     KeySystem = false
 })
+
+-- ========================================
+-- ONGLET AIMBOT
+-- ========================================
+local AimbotTab = Window:CreateTab("Aimbot", "target")
+
+local aimbotEnabled = false
+
+AimbotTab:CreateToggle({
+    Name = "Activer Aimbot",
+    CurrentValue = false,
+    Flag = "AimbotToggle",
+    Callback = function(Value)
+        aimbotEnabled = Value
+        if Value then
+            Aimbot.Load()
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = "Aimbot activé",
+                Duration = 2,
+                Image = "target",
+            })
+        else
+            Aimbot.Unload()
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = "Aimbot désactivé",
+                Duration = 2,
+                Image = "x-circle",
+            })
+        end
+    end
+})
+
+-- ========================================
+-- ONGLET ESP
+-- ========================================
+local ESPTab = Window:CreateTab("ESP", "eye")
+
+ESPTab:CreateToggle({
+    Name = "Activer ESP",
+    CurrentValue = false,
+    Flag = "ESPToggle",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.Enabled = Value
+            Rayfield:Notify({
+                Title = "ESP",
+                Content = Value and "ESP activé" or "ESP désactivé",
+                Duration = 2,
+                Image = "eye",
+            })
+        end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Tracer Lines",
+    CurrentValue = false,
+    Flag = "TracerToggle",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.TracerEnabled = Value
+        end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Afficher les boîtes",
+    CurrentValue = true,
+    Flag = "BoxToggle",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.BoxEnabled = Value
+        end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Afficher les noms",
+    CurrentValue = true,
+    Flag = "NameToggle",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.ShowName = Value
+        end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Afficher la distance",
+    CurrentValue = true,
+    Flag = "DistanceToggle",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.ShowDistance = Value
+        end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Afficher la santé",
+    CurrentValue = true,
+    Flag = "HealthToggle",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.ShowHealth = Value
+        end
+    end
+})
+
+ESPTab:CreateColorPicker({
+    Name = "Couleur ESP",
+    Color = Color3.fromRGB(255, 255, 255),
+    Flag = "ESPColor",
+    Callback = function(Value)
+        if ESP and ESP.Settings then
+            ESP.Settings.Color = Value
+        end
+    end
+})
+
+-- ========================================
+-- ONGLET ITEMS / GIVE
+-- ========================================
+local ItemsTab = Window:CreateTab("Items", "package")
+
+manager:scanAllItems()
+
+local selectedItem = nil
+local selectedPlayerForItem = nil
+
+ItemsTab:CreateSection("Sélection d'Item")
+
+local ItemDropdown = ItemsTab:CreateDropdown({
+    Name = "Choisir un item",
+    Options = manager:getItemNames(),
+    CurrentOption = {"Aucun"},
+    MultipleOptions = false,
+    Flag = "ItemDropdown",
+    Callback = function(Option)
+        selectedItem = type(Option) == "table" and Option[1] or Option
+        print("Item sélectionné:", selectedItem)
+        
+        Rayfield:Notify({
+            Title = "Item sélectionné",
+            Content = selectedItem,
+            Duration = 2,
+            Image = "package",
+        })
+    end,
+})
+
+ItemsTab:CreateInput({
+    Name = "Rechercher un item",
+    PlaceholderText = "Entrez un mot-clé...",
+    RemoveTextAfterFocusLost = false,
+    Flag = "ItemSearch",
+    Callback = function(Text)
+        if Text and Text ~= "" then
+            local results = manager:searchItems(Text)
+            if #results > 0 then
+                ItemDropdown:Refresh(results, true)
+                Rayfield:Notify({
+                    Title = "Recherche",
+                    Content = #results .. " item(s) trouvé(s)",
+                    Duration = 2,
+                    Image = "search",
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Recherche",
+                    Content = "Aucun item trouvé",
+                    Duration = 2,
+                    Image = "alert-circle",
+                })
+            end
+        end
+    end,
+})
+
+ItemsTab:CreateButton({
+    Name = "Rafraîchir la liste des items",
+    Callback = function()
+        local count = manager:refresh()
+        local itemNames = manager:getItemNames()
+        ItemDropdown:Refresh(itemNames, true)
+        
+        Rayfield:Notify({
+            Title = "Items rafraîchis",
+            Content = count .. " items disponibles",
+            Duration = 3,
+            Image = "refresh-cw",
+        })
+    end,
+})
+
+ItemsTab:CreateSection("Se donner des items")
+
+ItemsTab:CreateButton({
+    Name = "Me donner l'item sélectionné",
+    Callback = function()
+        if not selectedItem or selectedItem == "Aucun" then
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = "Veuillez sélectionner un item",
+                Duration = 3,
+                Image = "alert-triangle",
+            })
+            return
+        end
+        
+        local success, message = manager:giveItemToSelf(selectedItem)
+        
+        if success then
+            Rayfield:Notify({
+                Title = "Item donné",
+                Content = "Vous avez reçu: " .. selectedItem,
+                Duration = 3,
+                Image = "check-circle",
+            })
+        else
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = message or "Impossible de donner l'item",
+                Duration = 3,
+                Image = "x-circle",
+            })
+        end
+    end,
+})
+
+ItemsTab:CreateButton({
+    Name = "Vider mon inventaire",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local success, message = manager:clearPlayerInventory(player.Name)
+        
+        if success then
+            Rayfield:Notify({
+                Title = "Inventaire vidé",
+                Content = message,
+                Duration = 3,
+                Image = "trash-2",
+            })
+        else
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = message or "Impossible de vider l'inventaire",
+                Duration = 3,
+                Image = "x-circle",
+            })
+        end
+    end,
+})
+
+ItemsTab:CreateSection("Donner à un autre joueur")
+
+local PlayerDropdownForItems = ItemsTab:CreateDropdown({
+    Name = "Sélectionner un joueur",
+    Options = (function()
+        local players = {}
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                table.insert(players, player.Name)
+            end
+        end
+        return players
+    end)(),
+    CurrentOption = {"Aucun"},
+    MultipleOptions = false,
+    Flag = "ItemPlayerDropdown",
+    Callback = function(Option)
+        selectedPlayerForItem = type(Option) == "table" and Option[1] or Option
+        print("Joueur sélectionné:", selectedPlayerForItem)
+    end,
+})
+
+ItemsTab:CreateButton({
+    Name = "Donner l'item au joueur",
+    Callback = function()
+        if not selectedItem or selectedItem == "Aucun" then
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = "Veuillez sélectionner un item",
+                Duration = 3,
+                Image = "alert-triangle",
+            })
+            return
+        end
+        
+        if not selectedPlayerForItem or selectedPlayerForItem == "Aucun" then
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = "Veuillez sélectionner un joueur",
+                Duration = 3,
+                Image = "alert-triangle",
+            })
+            return
+        end
+        
+        local success, message = manager:giveItemToPlayer(selectedPlayerForItem, selectedItem)
+        
+        if success then
+            Rayfield:Notify({
+                Title = "Item donné",
+                Content = selectedItem .. " → " .. selectedPlayerForItem,
+                Duration = 3,
+                Image = "gift",
+            })
+        else
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = message or "Impossible de donner l'item",
+                Duration = 3,
+                Image = "x-circle",
+            })
+        end
+    end,
+})
+
+ItemsTab:CreateButton({
+    Name = "Rafraîchir la liste des joueurs",
+    Callback = function()
+        local players = {}
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                table.insert(players, player.Name)
+            end
+        end
+        
+        PlayerDropdownForItems:Refresh(players, true)
+        
+        Rayfield:Notify({
+            Title = "Joueurs rafraîchis",
+            Content = #players .. " joueur(s) trouvé(s)",
+            Duration = 2,
+            Image = "users",
+        })
+    end,
+})
+
+ItemsTab:CreateSection("Gestion d'inventaire")
+
+ItemsTab:CreateButton({
+    Name = "Voir mon inventaire",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local inventory = manager:getPlayerInventory(player.Name)
+        
+        if #inventory > 0 then
+            local itemList = table.concat(inventory, ", ")
+            Rayfield:Notify({
+                Title = "Mon inventaire (" .. #inventory .. " items)",
+                Content = itemList,
+                Duration = 5,
+                Image = "backpack",
+            })
+        else
+            Rayfield:Notify({
+                Title = "Inventaire vide",
+                Content = "Vous n'avez aucun item",
+                Duration = 3,
+                Image = "inbox",
+            })
+        end
+    end,
+})
+
+ItemsTab:CreateButton({
+    Name = "Dupliquer un item équipé",
+    Callback = function()
+        if not selectedItem or selectedItem == "Aucun" then
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = "Veuillez sélectionner un item",
+                Duration = 3,
+                Image = "alert-triangle",
+            })
+            return
+        end
+        
+        local player = game.Players.LocalPlayer
+        local success, message = manager:duplicatePlayerItem(player.Name, selectedItem)
+        
+        if success then
+            Rayfield:Notify({
+                Title = "Item dupliqué",
+                Content = selectedItem .. " x2",
+                Duration = 3,
+                Image = "copy",
+            })
+        else
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = message or "Item non trouvé dans l'inventaire",
+                Duration = 3,
+                Image = "x-circle",
+            })
+        end
+    end,
+})
+
+ItemsTab:CreateSection("Statistiques")
+
+ItemsTab:CreateButton({
+    Name = "Afficher les statistiques",
+    Callback = function()
+        local stats = manager:getStats()
+        
+        Rayfield:Notify({
+            Title = "Statistiques Items",
+            Content = string.format(
+                "Total: %d items\nCache: %d items",
+                stats.totalItems,
+                stats.cacheSize
+            ),
+            Duration = 4,
+            Image = "bar-chart",
+        })
+    end,
+})
+
+-- Rafraîchir automatiquement la liste des joueurs pour items
+game.Players.PlayerAdded:Connect(function(player)
+    task.wait(1)
+    local players = {}
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= game.Players.LocalPlayer then
+            table.insert(players, p.Name)
+        end
+    end
+    PlayerDropdownForItems:Refresh(players, true)
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    local players = {}
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= game.Players.LocalPlayer then
+            table.insert(players, p.Name)
+        end
+    end
+    PlayerDropdownForItems:Refresh(players, true)
+end)
 
 -- ========================================
 -- ONGLET AUTOCLICKER
@@ -301,12 +749,12 @@ local TeleportTab = Window:CreateTab("Teleportation", "map-pin")
 
 local selectedPlayerName = nil
 
-local PlayerDropdown = TeleportTab:CreateDropdown({
+local TeleportPlayerDropdown = TeleportTab:CreateDropdown({
     Name = "Selectionner un joueur",
     Options = Teleport.GetPlayers(),
     CurrentOption = {"Aucun"},
     MultipleOptions = false,
-    Flag = "PlayerDropdown",
+    Flag = "TeleportPlayerDropdown",
     Callback = function(Option)
         selectedPlayerName = type(Option) == "table" and Option[1] or Option
         print("Joueur selectionne:", selectedPlayerName)
@@ -348,7 +796,7 @@ TeleportTab:CreateButton({
     Name = "Rafraichir la liste",
     Callback = function()
         local newPlayerList = Teleport.GetPlayers()
-        PlayerDropdown:Refresh(newPlayerList, true)
+        TeleportPlayerDropdown:Refresh(newPlayerList, true)
         Rayfield:Notify({
             Title = "Liste mise a jour",
             Content = #newPlayerList .. " joueurs trouves",
@@ -362,13 +810,13 @@ TeleportTab:CreateButton({
 Teleport.OnPlayerAdded(function(player)
     task.wait(1)
     local newPlayerList = Teleport.GetPlayers()
-    PlayerDropdown:Refresh(newPlayerList, true)
+    TeleportPlayerDropdown:Refresh(newPlayerList, true)
 end)
 
 -- Rafraichir automatiquement la liste quand un joueur quitte
 Teleport.OnPlayerRemoving(function(player)
     local newPlayerList = Teleport.GetPlayers()
-    PlayerDropdown:Refresh(newPlayerList, true)
+    TeleportPlayerDropdown:Refresh(newPlayerList, true)
 end)
 
 -- ========================================
@@ -378,7 +826,7 @@ local InfoTab = Window:CreateTab("Informations", "info")
 
 InfoTab:CreateParagraph({
     Title = "Menu by Edaward_01",
-    Content = "Version 1.0\n\nFonctionnalités:\n- AutoClicker personnalisable\n- Mode Fly avec vitesse réglable\n- NoClip\n- Téléportation aux joueurs"
+    Content = "Version 1.5\n\nFonctionnalités:\n- Aimbot\n- ESP complet\n- Give Items\n- AutoClicker personnalisable\n- Mode Fly avec vitesse réglable\n- NoClip\n- Téléportation aux joueurs"
 })
 
 InfoTab:CreateButton({
@@ -388,4 +836,4 @@ InfoTab:CreateButton({
     end,
 })
 
-print("[Menu] Chargé avec succès par Edaward_01")
+print("[Menu] Chargé avec succès par Edaward_01 - Version 1.5")

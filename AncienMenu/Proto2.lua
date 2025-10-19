@@ -1,6 +1,6 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix01/lsscript/refs/heads/main/Fly.lua'))()
-local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix01/lsscript/refs/heads/main/TP.lua'))()
+local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/Fly.lua'))()
+local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/TP.lua'))()
 
 local Window = Rayfield:CreateWindow({
     Name = "Menu by Edaward_01",
@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- ONGLET FLY
-local FlyTab = Window:CreateTab("Fly", 4483345998)
+local FlyTab = Window:CreateTab("Fly", "plane")
 
 FlyTab:CreateToggle({
     Name = "Activer le Fly",
@@ -48,7 +48,7 @@ FlyTab:CreateSlider({
 })
 
 -- ONGLET NOCLIP
-local NoClipTab = Window:CreateTab("NoClip", 4483345998)
+local NoClipTab = Window:CreateTab("NoClip", "menu")
 
 NoClipTab:CreateToggle({
     Name = "Activer le NoClip",
@@ -64,7 +64,7 @@ NoClipTab:CreateToggle({
 })
 
 -- ONGLET TELEPORTATION
-local TeleportTab = Window:CreateTab("Teleportation", 4483345998)
+local TeleportTab = Window:CreateTab("Teleportation", "moon-star")
 
 local selectedPlayerName = nil
 

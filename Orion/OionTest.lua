@@ -1,24 +1,62 @@
-local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
--- Création de la fenêtre
-local Window = OrionLib:MakeWindow({
-    Name = "Mon Menu",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "MonMenu"
+OrionLib:MakeNotification({
+	Name = "Orion Example",
+	Content = "Orion Example",
+	Image = "rbxassetid://4483345998",
+	Time = 5
 })
 
--- Création d'un onglet
-local Tab = Window:MakeTab({
-    Name = "Principal",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
+
+local Window = OrionLib:MakeWindow({Name = "Orion Example", HidePremium = false, SaveConfig = true, ConfigFolder = "Orion"})
+
+--Player Tab--
+
+local PlayerTab = Window:MakeTab({
+	Name = "Player",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
 })
 
--- Ajout d'une section
-local Section = Tab:AddSection({
-    Name = "Bienvenue"
+local PlayerSection = PlayerTab:AddSection({
+	Name = "Player"
 })
 
--- Initialisation (toujours à la fin)
-OrionLib:Init()
+
+PlayerSection:AddSlider({
+	Name = "Walkspeed",
+	Min = 16,
+	Max = 100,
+	Default = 5,
+	Color = Color3.fromRGB(255,255,255),
+	Increment = 1,
+	ValueName = "Walkspeed",
+	Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+	end    
+})
+
+--Player Tab End--
+
+--Settings Tab--
+
+local SettingsTab = Window:MakeTab({
+	Name = "Settings",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local SettingsSection = SettingsTab:AddSection({
+	Name = "Settings"
+})
+
+SettingsSection:AddButton({
+	Name = "Destroy UI",
+	Callback = function()
+        OrionLib:Destroy()
+  	end    
+})
+
+--Settings End--
+
+OrionLib:Init() --UI Lib End

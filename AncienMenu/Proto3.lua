@@ -5,7 +5,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/Fly.lua'))()
 local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/TP.lua'))()
 local ESP = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/ESP.lua'))()
-local Aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua"))()
+local Aimbot = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/aimbot.lua'))()
 local ItemsManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/give.lua'))()
 local manager = ItemsManager.new()
 
@@ -92,7 +92,7 @@ end
 -- CREATION DE LA FENETRE
 -- ========================================
 local Window = Rayfield:CreateWindow({
-    Name = "Menu by Edaward_01",
+    Name = "Menu by Edaward_01 v2.0",
     LoadingTitle = "Chargement...",
     LoadingSubtitle = "by Edaward_01",
     ConfigurationSaving = {
@@ -109,11 +109,13 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- ========================================
--- ONGLET AIMBOT
+-- ONGLET AIMBOT (AMELIORE)
 -- ========================================
 local AimbotTab = Window:CreateTab("Aimbot", "target")
 
 local aimbotEnabled = false
+
+AimbotTab:CreateSection("Activation")
 
 AimbotTab:CreateToggle({
     Name = "Activer Aimbot",
@@ -130,12 +132,397 @@ AimbotTab:CreateToggle({
                 Image = "target",
             })
         else
-            Aimbot.Unload()
+            if Aimbot.Settings then
+                Aimbot:Toggle(false)
+            end
             Rayfield:Notify({
                 Title = "Aimbot",
                 Content = "Aimbot désactivé",
                 Duration = 2,
                 Image = "x-circle",
+            })
+        end
+    end,
+})
+
+AimbotTab:CreateSection("Paramètres de Base")
+
+AimbotTab:CreateToggle({
+    Name = "Team Check",
+    CurrentValue = false,
+    Flag = "AimbotTeamCheck",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.TeamCheck = Value
+        end
+    end,
+})
+
+AimbotTab:CreateToggle({
+    Name = "Wall Check",
+    CurrentValue = false,
+    Flag = "AimbotWallCheck",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.WallCheck = Value
+        end
+    end,
+})
+
+AimbotTab:CreateToggle({
+    Name = "Alive Check",
+    CurrentValue = true,
+    Flag = "AimbotAliveCheck",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.AliveCheck = Value
+        end
+    end,
+})
+
+AimbotTab:CreateToggle({
+    Name = "Mode Toggle",
+    CurrentValue = false,
+    Flag = "AimbotToggleMode",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.Toggle = Value
+            Rayfield:Notify({
+                Title = "Mode Toggle",
+                Content = Value and "Mode toggle activé" or "Mode maintenu activé",
+                Duration = 2,
+                Image = "toggle-left",
+            })
+        end
+    end,
+})
+
+AimbotTab:CreateSection("Paramètres Avancés")
+
+AimbotTab:CreateDropdown({
+    Name = "Lock Mode",
+    Options = {"CFrame (Smooth)", "MouseMoveRel (Direct)"},
+    CurrentOption = {"CFrame (Smooth)"},
+    MultipleOptions = false,
+    Flag = "AimbotLockMode",
+    Callback = function(Option)
+        if Aimbot and Aimbot.Settings then
+            local mode = Option[1] or Option
+            Aimbot.Settings.LockMode = mode:find("CFrame") and 1 or 2
+        end
+    end,
+})
+
+AimbotTab:CreateDropdown({
+    Name = "Lock Part (Partie visée)",
+    Options = {"Head", "HumanoidRootPart", "Torso", "UpperTorso", "LowerTorso"},
+    CurrentOption = {"Head"},
+    MultipleOptions = false,
+    Flag = "AimbotLockPart",
+    Callback = function(Option)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.LockPart = Option[1] or Option
+            Rayfield:Notify({
+                Title = "Lock Part",
+                Content = "Visée: " .. (Option[1] or Option),
+                Duration = 2,
+                Image = "crosshair",
+            })
+        end
+    end,
+})
+
+AimbotTab:CreateSlider({
+    Name = "Sensibilité (Smoothness)",
+    Range = {0, 5},
+    Increment = 0.1,
+    Suffix = "s",
+    CurrentValue = 0,
+    Flag = "AimbotSensitivity",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.Sensitivity = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSlider({
+    Name = "MouseMoveRel Sensitivity",
+    Range = {1, 10},
+    Increment = 0.5,
+    Suffix = "",
+    CurrentValue = 3.5,
+    Flag = "AimbotSensitivity2",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.Sensitivity2 = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSection("Prédiction de Mouvement")
+
+AimbotTab:CreateToggle({
+    Name = "Prédiction Activée",
+    CurrentValue = true,
+    Flag = "AimbotPrediction",
+    Callback = function(Value)
+        if Aimbot and Aimbot.DeveloperSettings then
+            Aimbot.DeveloperSettings.PredictionEnabled = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSlider({
+    Name = "Force de Prédiction",
+    Range = {0, 1},
+    Increment = 0.05,
+    Suffix = "",
+    CurrentValue = 0.15,
+    Flag = "AimbotPredictionMultiplier",
+    Callback = function(Value)
+        if Aimbot and Aimbot.DeveloperSettings then
+            Aimbot.DeveloperSettings.PredictionMultiplier = Value
+        end
+    end,
+})
+
+AimbotTab:CreateToggle({
+    Name = "Offset vers Direction",
+    CurrentValue = false,
+    Flag = "AimbotOffset",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.OffsetToMoveDirection = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSlider({
+    Name = "Offset Increment",
+    Range = {1, 30},
+    Increment = 1,
+    Suffix = "",
+    CurrentValue = 15,
+    Flag = "AimbotOffsetIncrement",
+    Callback = function(Value)
+        if Aimbot and Aimbot.Settings then
+            Aimbot.Settings.OffsetIncrement = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSection("FOV (Champ de Vision)")
+
+AimbotTab:CreateToggle({
+    Name = "Afficher FOV Circle",
+    CurrentValue = true,
+    Flag = "AimbotFOVVisible",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.Visible = Value
+        end
+    end,
+})
+
+AimbotTab:CreateToggle({
+    Name = "FOV Enabled",
+    CurrentValue = true,
+    Flag = "AimbotFOVEnabled",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.Enabled = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSlider({
+    Name = "FOV Radius",
+    Range = {10, 500},
+    Increment = 5,
+    Suffix = " px",
+    CurrentValue = 90,
+    Flag = "AimbotFOVRadius",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.Radius = Value
+        end
+    end,
+})
+
+AimbotTab:CreateSlider({
+    Name = "FOV Transparence",
+    Range = {0, 1},
+    Increment = 0.1,
+    Suffix = "",
+    CurrentValue = 1,
+    Flag = "AimbotFOVTransparency",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.Transparency = Value
+        end
+    end,
+})
+
+AimbotTab:CreateToggle({
+    Name = "Rainbow FOV Color",
+    CurrentValue = false,
+    Flag = "AimbotRainbowFOV",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.RainbowColor = Value
+        end
+    end,
+})
+
+AimbotTab:CreateColorPicker({
+    Name = "FOV Color",
+    Color = Color3.fromRGB(255, 255, 255),
+    Flag = "AimbotFOVColor",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.Color = Value
+        end
+    end
+})
+
+AimbotTab:CreateColorPicker({
+    Name = "Locked Color",
+    Color = Color3.fromRGB(255, 150, 150),
+    Flag = "AimbotLockedColor",
+    Callback = function(Value)
+        if Aimbot and Aimbot.FOVSettings then
+            Aimbot.FOVSettings.LockedColor = Value
+        end
+    end
+})
+
+AimbotTab:CreateSection("Gestion des Joueurs")
+
+local blacklistInput = ""
+AimbotTab:CreateInput({
+    Name = "Blacklist un joueur",
+    PlaceholderText = "Nom du joueur...",
+    RemoveTextAfterFocusLost = false,
+    Flag = "AimbotBlacklistInput",
+    Callback = function(Text)
+        blacklistInput = Text
+    end,
+})
+
+AimbotTab:CreateButton({
+    Name = "Ajouter à la Blacklist",
+    Callback = function()
+        if blacklistInput and blacklistInput ~= "" then
+            if Aimbot and Aimbot.Blacklist then
+                local success = pcall(function()
+                    Aimbot:Blacklist(blacklistInput)
+                end)
+                if success then
+                    Rayfield:Notify({
+                        Title = "Blacklist",
+                        Content = blacklistInput .. " ajouté",
+                        Duration = 2,
+                        Image = "user-x",
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "Erreur",
+                        Content = "Joueur introuvable",
+                        Duration = 2,
+                        Image = "alert-triangle",
+                    })
+                end
+            end
+        end
+    end,
+})
+
+local whitelistInput = ""
+AimbotTab:CreateInput({
+    Name = "Whitelist un joueur",
+    PlaceholderText = "Nom du joueur...",
+    RemoveTextAfterFocusLost = false,
+    Flag = "AimbotWhitelistInput",
+    Callback = function(Text)
+        whitelistInput = Text
+    end,
+})
+
+AimbotTab:CreateButton({
+    Name = "Retirer de la Blacklist",
+    Callback = function()
+        if whitelistInput and whitelistInput ~= "" then
+            if Aimbot and Aimbot.Whitelist then
+                local success = pcall(function()
+                    Aimbot:Whitelist(whitelistInput)
+                end)
+                if success then
+                    Rayfield:Notify({
+                        Title = "Whitelist",
+                        Content = whitelistInput .. " retiré",
+                        Duration = 2,
+                        Image = "user-check",
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "Erreur",
+                        Content = "Joueur non blacklisté",
+                        Duration = 2,
+                        Image = "alert-triangle",
+                    })
+                end
+            end
+        end
+    end,
+})
+
+AimbotTab:CreateSection("Actions")
+
+AimbotTab:CreateButton({
+    Name = "Redémarrer Aimbot",
+    Callback = function()
+        if Aimbot and Aimbot.Restart then
+            Aimbot.Restart()
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = "Aimbot redémarré",
+                Duration = 2,
+                Image = "refresh-cw",
+            })
+        end
+    end,
+})
+
+AimbotTab:CreateButton({
+    Name = "Voir les Statistiques",
+    Callback = function()
+        if Aimbot and Aimbot.GetStats then
+            local stats = Aimbot:GetStats()
+            Rayfield:Notify({
+                Title = "Statistiques Aimbot",
+                Content = string.format(
+                    "Locks: %d\nCible: %s",
+                    stats.TotalLocks or 0,
+                    stats.CurrentTarget or "Aucune"
+                ),
+                Duration = 4,
+                Image = "bar-chart",
+            })
+        end
+    end,
+})
+
+AimbotTab:CreateButton({
+    Name = "Désactiver Complètement",
+    Callback = function()
+        if Aimbot and Aimbot.Exit then
+            Aimbot:Exit()
+            Rayfield:Notify({
+                Title = "Aimbot",
+                Content = "Aimbot complètement désactivé",
+                Duration = 2,
+                Image = "power",
             })
         end
     end,
@@ -249,8 +636,6 @@ local ItemDropdown = ItemsTab:CreateDropdown({
     Flag = "ItemDropdown",
     Callback = function(Option)
         selectedItem = type(Option) == "table" and Option[1] or Option
-        print("Item sélectionné:", selectedItem)
-        
         Rayfield:Notify({
             Title = "Item sélectionné",
             Content = selectedItem,
@@ -339,30 +724,6 @@ ItemsTab:CreateButton({
     end,
 })
 
-ItemsTab:CreateButton({
-    Name = "Vider mon inventaire",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local success, message = manager:clearPlayerInventory(player.Name)
-        
-        if success then
-            Rayfield:Notify({
-                Title = "Inventaire vidé",
-                Content = message,
-                Duration = 3,
-                Image = "trash-2",
-            })
-        else
-            Rayfield:Notify({
-                Title = "Erreur",
-                Content = message or "Impossible de vider l'inventaire",
-                Duration = 3,
-                Image = "x-circle",
-            })
-        end
-    end,
-})
-
 ItemsTab:CreateSection("Donner à un autre joueur")
 
 local PlayerDropdownForItems = ItemsTab:CreateDropdown({
@@ -381,7 +742,6 @@ local PlayerDropdownForItems = ItemsTab:CreateDropdown({
     Flag = "ItemPlayerDropdown",
     Callback = function(Option)
         selectedPlayerForItem = type(Option) == "table" and Option[1] or Option
-        print("Joueur sélectionné:", selectedPlayerForItem)
     end,
 })
 
@@ -427,130 +787,6 @@ ItemsTab:CreateButton({
         end
     end,
 })
-
-ItemsTab:CreateButton({
-    Name = "Rafraîchir la liste des joueurs",
-    Callback = function()
-        local players = {}
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                table.insert(players, player.Name)
-            end
-        end
-        
-        PlayerDropdownForItems:Refresh(players, true)
-        
-        Rayfield:Notify({
-            Title = "Joueurs rafraîchis",
-            Content = #players .. " joueur(s) trouvé(s)",
-            Duration = 2,
-            Image = "users",
-        })
-    end,
-})
-
-ItemsTab:CreateSection("Gestion d'inventaire")
-
-ItemsTab:CreateButton({
-    Name = "Voir mon inventaire",
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local inventory = manager:getPlayerInventory(player.Name)
-        
-        if #inventory > 0 then
-            local itemList = table.concat(inventory, ", ")
-            Rayfield:Notify({
-                Title = "Mon inventaire (" .. #inventory .. " items)",
-                Content = itemList,
-                Duration = 5,
-                Image = "backpack",
-            })
-        else
-            Rayfield:Notify({
-                Title = "Inventaire vide",
-                Content = "Vous n'avez aucun item",
-                Duration = 3,
-                Image = "inbox",
-            })
-        end
-    end,
-})
-
-ItemsTab:CreateButton({
-    Name = "Dupliquer un item équipé",
-    Callback = function()
-        if not selectedItem or selectedItem == "Aucun" then
-            Rayfield:Notify({
-                Title = "Erreur",
-                Content = "Veuillez sélectionner un item",
-                Duration = 3,
-                Image = "alert-triangle",
-            })
-            return
-        end
-        
-        local player = game.Players.LocalPlayer
-        local success, message = manager:duplicatePlayerItem(player.Name, selectedItem)
-        
-        if success then
-            Rayfield:Notify({
-                Title = "Item dupliqué",
-                Content = selectedItem .. " x2",
-                Duration = 3,
-                Image = "copy",
-            })
-        else
-            Rayfield:Notify({
-                Title = "Erreur",
-                Content = message or "Item non trouvé dans l'inventaire",
-                Duration = 3,
-                Image = "x-circle",
-            })
-        end
-    end,
-})
-
-ItemsTab:CreateSection("Statistiques")
-
-ItemsTab:CreateButton({
-    Name = "Afficher les statistiques",
-    Callback = function()
-        local stats = manager:getStats()
-        
-        Rayfield:Notify({
-            Title = "Statistiques Items",
-            Content = string.format(
-                "Total: %d items\nCache: %d items",
-                stats.totalItems,
-                stats.cacheSize
-            ),
-            Duration = 4,
-            Image = "bar-chart",
-        })
-    end,
-})
-
--- Rafraîchir automatiquement la liste des joueurs pour items
-game.Players.PlayerAdded:Connect(function(player)
-    task.wait(1)
-    local players = {}
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= game.Players.LocalPlayer then
-            table.insert(players, p.Name)
-        end
-    end
-    PlayerDropdownForItems:Refresh(players, true)
-end)
-
-game.Players.PlayerRemoving:Connect(function(player)
-    local players = {}
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= game.Players.LocalPlayer then
-            table.insert(players, p.Name)
-        end
-    end
-    PlayerDropdownForItems:Refresh(players, true)
-end)
 
 -- ========================================
 -- ONGLET AUTOCLICKER
@@ -602,14 +838,6 @@ Auto:CreateSlider({
     Callback = function(Value)
         local interval = math.floor(1000 / Value)
         clicker:setInterval(interval)
-        if clickerEnabled then
-            Rayfield:Notify({
-                Title = "AutoClicker",
-                Content = "Vitesse: " .. Value .. " CPS",
-                Duration = 1.5,
-                Image = "gauge",
-            })
-        end
     end,
 })
 
@@ -622,39 +850,17 @@ Auto:CreateDropdown({
     Callback = function(Option)
         local button = type(Option) == "table" and Option[1] or Option
         clicker:setButton(button)
-        if clickerEnabled then
-            Rayfield:Notify({
-                Title = "AutoClicker",
-                Content = "Bouton: " .. button,
-                Duration = 1.5,
-                Image = "mouse-pointer",
-            })
-        end
     end,
 })
 
 Auto:CreateButton({
     Name = "Statistiques",
     Callback = function()
-        local stats = clicker.click_count
         Rayfield:Notify({
             Title = "Statistiques",
-            Content = "Total de clics: " .. stats,
+            Content = "Total de clics: " .. clicker.click_count,
             Duration = 3,
             Image = "bar-chart",
-        })
-    end,
-})
-
-Auto:CreateButton({
-    Name = "Réinitialiser le compteur",
-    Callback = function()
-        clicker.click_count = 0
-        Rayfield:Notify({
-            Title = "AutoClicker",
-            Content = "Compteur réinitialisé",
-            Duration = 2,
-            Image = "rotate-ccw",
         })
     end,
 })
@@ -664,14 +870,11 @@ Auto:CreateButton({
 -- ========================================
 local FlyTab = Window:CreateTab("Fly", "plane")
 
-local flyEnabled = false
-
 FlyTab:CreateToggle({
     Name = "Activer le Fly",
     CurrentValue = false,
     Flag = "FlyToggle",
     Callback = function(Value)
-        flyEnabled = Value
         if Value then
             Lib.Fly.On()
             Rayfield:Notify({
@@ -701,14 +904,6 @@ FlyTab:CreateSlider({
     Flag = "FlySpeed",
     Callback = function(Value)
         Lib.Fly.Speed(Value)
-        if flyEnabled then
-            Rayfield:Notify({
-                Title = "Fly",
-                Content = "Vitesse: " .. Value,
-                Duration = 1.5,
-                Image = "gauge",
-            })
-        end
     end,
 })
 
@@ -757,7 +952,6 @@ local TeleportPlayerDropdown = TeleportTab:CreateDropdown({
     Flag = "TeleportPlayerDropdown",
     Callback = function(Option)
         selectedPlayerName = type(Option) == "table" and Option[1] or Option
-        print("Joueur selectionne:", selectedPlayerName)
     end,
 })
 
@@ -806,14 +1000,13 @@ TeleportTab:CreateButton({
     end,
 })
 
--- Rafraichir automatiquement la liste quand un joueur rejoint
+-- Rafraichir automatiquement
 Teleport.OnPlayerAdded(function(player)
     task.wait(1)
     local newPlayerList = Teleport.GetPlayers()
     TeleportPlayerDropdown:Refresh(newPlayerList, true)
 end)
 
--- Rafraichir automatiquement la liste quand un joueur quitte
 Teleport.OnPlayerRemoving(function(player)
     local newPlayerList = Teleport.GetPlayers()
     TeleportPlayerDropdown:Refresh(newPlayerList, true)
@@ -825,8 +1018,30 @@ end)
 local InfoTab = Window:CreateTab("Informations", "info")
 
 InfoTab:CreateParagraph({
-    Title = "Menu by Edaward_01",
-    Content = "Version 1.5\n\nFonctionnalités:\n- Aimbot\n- ESP complet\n- Give Items\n- AutoClicker personnalisable\n- Mode Fly avec vitesse réglable\n- NoClip\n- Téléportation aux joueurs"
+    Title = "Menu by Edaward_01 v2.0",
+    Content = "Version 2.0 avec Aimbot Amélioré\n\nFonctionnalités:\n✓ Aimbot avancé avec prédiction\n✓ ESP complet\n✓ Give Items\n✓ AutoClicker personnalisable\n✓ Mode Fly avec vitesse réglable\n✓ NoClip\n✓ Téléportation aux joueurs"
+})
+
+InfoTab:CreateSection("Guide Aimbot")
+
+InfoTab:CreateParagraph({
+    Title = "Comment utiliser l'Aimbot",
+    Content = "1. Activez l'aimbot dans l'onglet Aimbot\n2. Maintenez le bouton droit de la souris\n3. L'aimbot se verrouillera sur la cible\n\nConseils:\n- Mode Toggle pour lock/unlock\n- Augmentez la Sensibilité pour plus de smoothness\n- Wall Check évite de viser à travers les murs\n- La prédiction aide à toucher les cibles en mouvement"
+})
+
+InfoTab:CreateSection("Actions")
+
+InfoTab:CreateButton({
+    Name = "Copier le lien du script",
+    Callback = function()
+        setclipboard("https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/menu.lua")
+        Rayfield:Notify({
+            Title = "Lien copié",
+            Content = "Lien du script copié",
+            Duration = 3,
+            Image = "clipboard",
+        })
+    end,
 })
 
 InfoTab:CreateButton({
@@ -836,4 +1051,38 @@ InfoTab:CreateButton({
     end,
 })
 
-print("[Menu] Chargé avec succès par Edaward_01 - Version 1.1")
+InfoTab:CreateSection("Crédits")
+
+InfoTab:CreateParagraph({
+    Title = "Développement",
+    Content = "Menu: Edaward_01\nAimbot: Exunys\nInterface: Rayfield\n\nVersion: 2.0\nDate: 2025"
+})
+
+-- ========================================
+-- INITIALISATION
+-- ========================================
+
+Rayfield:Notify({
+    Title = "Menu by Edaward_01",
+    Content = "Menu chargé avec succès ! Version 2.0",
+    Duration = 5,
+    Image = "check-circle",
+})
+
+print("========================================")
+print("[Menu] Chargé avec succès")
+print("[Menu] Version 2.0 - By Edaward_01")
+print("[Menu] Aimbot amélioré intégré")
+print("========================================")
+
+-- Nettoyage à la fermeture
+game:GetService("CoreGui").ChildRemoved:Connect(function(child)
+    if child.Name == "Rayfield" then
+        if getgenv().ExunysDeveloperAimbot and getgenv().ExunysDeveloperAimbot.Exit then
+            pcall(function()
+                getgenv().ExunysDeveloperAimbot:Exit()
+            end)
+        end
+        print("[Menu] Fermé proprement")
+    end
+end)

@@ -1072,7 +1072,6 @@ Rayfield:Notify({
 print("========================================")
 print("[Menu] Chargé avec succès")
 print("[Menu] Version 2.0 - By Edaward_01")
-print("[Menu] Aimbot amélioré intégré")
 print("========================================")
 
 -- Nettoyage à la fermeture

@@ -6,6 +6,7 @@ local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-
 local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/TP.lua'))()
 local ESP = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/ESP.lua'))()
 local Aimbot = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/aimbot.lua'))()
+local AdminLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/moneyexploit.lua'))()
 local ItemsManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix02-sys/BlackJack-Tools/refs/heads/main/give.lua'))()
 local manager = ItemsManager.new()
 
@@ -106,6 +107,80 @@ local Window = Rayfield:CreateWindow({
         RememberJoins = true
     },
     KeySystem = false
+})
+
+-- Variables globales pour stocker les inputs
+local targetPlayerName = ""
+local targetAmount = 0
+
+-- Créer l'onglet dans Rayfield
+local MoneyTab = Window:CreateTab("Gestion Argent", "dollar-sign")
+
+-- Créer la section
+MoneyTab:CreateSection("Gestion de l'Argent des Joueurs")
+
+-- Input pour le nom du joueur
+MoneyTab:CreateInput({
+    Name = "Nom du Joueur",
+    PlaceholderText = "Entrez le nom du joueur...",
+    RemoveTextAfterFocusLost = false,
+    Flag = "PlayerNameInput",
+    Callback = function(Text)
+        targetPlayerName = Text
+    end,
+})
+
+-- Input pour le montant
+MoneyTab:CreateInput({
+    Name = "Montant d'Argent",
+    PlaceholderText = "Entrez le montant...",
+    RemoveTextAfterFocusLost = false,
+    Flag = "AmountInput",
+    Callback = function(Text)
+        targetAmount = tonumber(Text) or 0
+    end,
+})
+
+-- Bouton pour définir l'argent
+MoneyTab:CreateButton({
+    Name = "Définir l'Argent",
+    Callback = function()
+        if targetPlayerName ~= "" and targetAmount > 0 then
+            local player = game.Players:FindFirstChild(targetPlayerName)
+            if player then
+                local success = AdminLib:SetMoney(player, targetAmount)
+                if success then
+                    Rayfield:Notify({
+                        Title = "Succès",
+                        Content = "Argent de " .. targetPlayerName .. " défini à " .. targetAmount .. "$",
+                        Duration = 5,
+                        Image = 4483362458,
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "Erreur",
+                        Content = "Impossible de définir l'argent",
+                        Duration = 5,
+                        Image = 4483362458,
+                    })
+                end
+            else
+                Rayfield:Notify({
+                    Title = "Erreur",
+                    Content = "Joueur introuvable: " .. targetPlayerName,
+                    Duration = 5,
+                    Image = 4483362458,
+                })
+            end
+        else
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = "Nom ou montant invalide",
+                Duration = 5,
+                Image = 4483362458,
+            })
+        end
+    end,
 })
 
 -- ========================================
